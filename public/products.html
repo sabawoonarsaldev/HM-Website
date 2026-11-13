@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Products | HM Trading Company</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="/js/i18n.js"></script>
+  <script src="/js/config.js"></script>
+  <script src="/js/app.js"></script>
+</head>
+<body>
+<header id="navbar" class="navbar"></header>
+<div id="sliderMount"></div>
+
+<main class="page">
+  <div class="section-head">
+    <h2 id="heading">All Products</h2>
+    <div class="filter">
+      <select class="select" id="catSelect"><option value="">All Categories</option></select>
+    </div>
+  </div>
+  <div class="grid" id="grid"></div>
+  <div class="more"><button class="btn" id="moreBtn" style="display:none">Load more</button></div>
+</main>
+
+<footer id="footer"></footer>
+
+<script>
+  const params = new URLSearchParams(location.search);
+  const search = params.get('search') || '';
+  let category = params.get('category') || '';
+  let page = 1;
+  const grid = document.getElementById('grid'), moreBtn = document.getElementById('moreBtn');
+
+  async function load(reset) {
+    if (reset) { page = 1; grid.innerHTML = ''; }
+    const qs = new URLSearchParams({ limit: 12, page });
+    if (search) qs.set('search', search);
+    if (category) qs.set('category', category);
+    try {
+      const data = await api('/api/products?' + qs);
+      if (reset && !data.products.length) grid.innerHTML = emptyBox('No products found.');
+      grid.insertAdjacentHTML('beforeend', data.products.map(card).join(''));
+      moreBtn.style.display = page * data.limit < data.total ? 'inline-flex' : 'none';
+    } catch (e) { grid.innerHTML = emptyBox(esc(e.message)); }
+  }
+
+  (async () => {
+    if (search) document.getElementById('heading').textContent = `Results for "${search}"`;
+    const cats = await api('/api/categories');
+    const sel = document.getElementById('catSelect');
+    sel.innerHTML += cats.map(c => `<option value="${c.id}">${esc(c.name)} (${c.product_count})</option>`).join('');
+    sel.value = category;
+    sel.onchange = () => { category = sel.value; load(true); };
+    moreBtn.onclick = () => { page++; load(false); };
+    load(true);
+  })();
+</script>
+</body>
+</html>

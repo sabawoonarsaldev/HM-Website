@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>HM Trading Company</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="/js/i18n.js"></script>
+  <script src="/js/config.js"></script>
+  <script src="/js/app.js"></script>
+</head>
+<body>
+<header id="navbar" class="navbar"></header>
+<div id="sliderMount"></div>
+
+<main class="page">
+  <div class="section-head">
+    <h2>Latest Products</h2>
+    <a href="/products.html">View all →</a>
+  </div>
+  <div class="grid" id="grid"></div>
+</main>
+
+<footer id="footer"></footer>
+
+<script>
+  (async () => {
+    try {
+      const { products } = await getLatest();
+            document.getElementById('grid').innerHTML =
+        products.length ? products.map(card).join('') : emptyBox('No products have been added yet.');
+    } catch (e) {
+      document.getElementById('grid').innerHTML = emptyBox(esc(e.message));
+    }
+  })();
+</script>
+</body>
+</html>

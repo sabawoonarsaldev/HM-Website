@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Admin Login | HM Trading Company</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="/js/i18n.js"></script>
+  <script src="/js/config.js"></script>
+  <script src="/js/app.js"></script>
+</head>
+<body>
+<div class="auth">
+  <div class="auth-side">
+    <div class="logo">HM</div>
+    <h1>HM Trading Company</h1>
+    <p>Administrator area. Login to manage products, categories, users and messages.</p>
+  </div>
+
+  <div class="auth-form-wrap">
+    <button class="icon-btn theme-corner" id="themeBtn" onclick="toggleTheme()"></button>
+    <div class="auth-box">
+      <a href="/index.html" style="color:var(--green);font-weight:600;display:inline-block;margin-bottom:22px">← Back to website</a>
+      <h2>Admin Login</h2>
+      <p class="sub">Please login with your administrator account.</p>
+
+      <div class="msg" id="msg"></div>
+      <div class="field"><label>Email</label><input id="email" type="email" placeholder="admin@example.com"></div>
+      <div class="field"><label>Password</label>
+        <div class="pw-wrap">
+          <input id="password" type="password" placeholder="••••••••">
+          <button type="button" class="pw-eye" id="eye" aria-label="Show password"></button>
+        </div>
+      </div>
+            <button class="btn" id="submit">Login</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const $ = id => document.getElementById(id);
+  if (Auth.isAdmin()) location.replace('/admin.html');
+  $('themeBtn').innerHTML = icon(document.documentElement.dataset.theme === 'dark' ? 'sun' : 'moon');
+
+
+    const EYE = '<svg class="i" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
+  const EYE_OFF = '<svg class="i" viewBox="0 0 24 24"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>';
+  $('eye').innerHTML = EYE;
+  $('eye').onclick = () => {
+    const show = $('password').type === 'password';
+    $('password').type = show ? 'text' : 'password';
+    $('eye').innerHTML = show ? EYE_OFF : EYE;
+  };
+
+
+  async function submit() {
+    $('msg').className = 'msg';
+    $('submit').disabled = true;
+    try {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: $('email').value, password: $('password').value })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message);
+      if (data.user.role !== 'admin') throw new Error('This account is not an administrator.');
+      Auth.save(data.token, data.user);
+      location.href = '/admin.html';
+    } catch (err) {
+      $('msg').textContent = err.message;
+      $('msg').className = 'msg err';
+    }
+    $('submit').disabled = false;
+  }
+  $('submit').onclick = submit;
+  document.addEventListener('keydown', e => { if (e.key === 'Enter') submit(); });
+</script>
+</body>
+</html>
