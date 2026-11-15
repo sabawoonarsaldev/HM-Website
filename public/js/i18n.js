@@ -64,7 +64,11 @@ const I18N = {
     'New category name': 'د نوې کټګورۍ نوم', 'Full name': 'بشپړ نوم',
     'Reset Password': 'پاسورډ بدل کړئ', 'Reply on WhatsApp': 'په واټس‌اپ ځواب ورکړئ',
     'Reply by Email': 'په ایمیل ځواب ورکړئ', 'No messages yet.': 'تر اوسه پیغام نشته.',
-    'No products yet.': 'تر اوسه محصول نشته.', 'Latest': 'وروستي'
+    'No products yet.': 'تر اوسه محصول نشته.', 'Latest': 'وروستي',
+     'Reach us directly by WhatsApp, phone or email. We reply as soon as possible.':
+      'موږ سره مستقیم په واټس‌اپ، تلیفون یا ایمیل اړیکه ونیسئ. موږ ژر ځواب درکوو.',
+    'WhatsApp': 'واټس‌اپ', 'Call': 'زنګ', 'Send Email': 'ایمیل ولیږئ', 'Open in Maps': 'په نقشه کې وګورئ',
+ 
   }
 };
 

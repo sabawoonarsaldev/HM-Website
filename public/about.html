@@ -33,10 +33,7 @@
         <div class="panel"><h3>Our Vision</h3><p>${esc(C.vision)}</p></div>
       </div>
 
-      <h2 class="h-title">Our History</h2>
-      <div class="timeline">${C.history.map(h => `
-        <div class="t-item"><b>${esc(h.year)}</b><h4>${esc(h.title)}</h4><p>${esc(h.text)}</p></div>`).join('')}</div>
-
+     
       <h2 class="h-title">Why Choose Us</h2>
       <div class="feat">${C.features.map(f => `<div class="panel"><h3>${esc(f.t)}</h3><p>${esc(f.d)}</p></div>`).join('')}</div>
 

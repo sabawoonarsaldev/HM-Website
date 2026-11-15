@@ -213,7 +213,7 @@ svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke
 .hero-about{text-align:center;padding:40px 10px 30px;max-width:780px;margin:auto}
 .hero-about h1{font-size:clamp(28px,4vw,46px);line-height:1.15;margin:12px 0;background:linear-gradient(135deg,#22c55e,#15803d);-webkit-background-clip:text;background-clip:text;color:transparent}
 .hero-about p{color:var(--muted);font-size:17px}
-.stats4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px;margin:10px 0 46px}
+.stats4{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,200px),1fr));gap:18px;margin:10px 0 46px}
 .stat,.panel{background:var(--card);border:1px solid var(--border);border-top:3px solid var(--green-light);border-radius:var(--radius);padding:24px}
 .stat{text-align:center}
 .stat b{display:block;font-size:34px;color:var(--green-dark)}
@@ -444,3 +444,17 @@ svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke
 .tag button{width:26px;height:26px;border-radius:50%;border:0;background:var(--danger);color:#fff;
   cursor:pointer;font-size:16px;line-height:1}
 .panel .form-grid{margin-bottom:6px}
+
+/* ===== Contact cards ===== */
+.c-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));gap:22px}
+.c-card{background:var(--card);border:1px solid var(--border);border-top:3px solid var(--green-light);
+  border-radius:24px;padding:28px 24px;text-align:center;box-shadow:var(--shadow);transition:.3s;min-width:0}
+.c-card:hover{transform:translateY(-6px);box-shadow:0 22px 44px rgba(34,197,94,.3)}
+.c-card .info-ic{width:60px;height:60px;margin:0 auto 14px;border-radius:18px}
+.c-card h3{font-size:19px;margin-bottom:6px}
+.c-val{font-size:18px;font-weight:700;color:var(--green-dark);overflow-wrap:anywhere}
+.c-btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:18px}
+.c-btns .btn{padding:11px 22px;font-size:14px}
+.c-btns .btn-sm{display:inline-flex;align-items:center;gap:6px;padding:11px 20px;font-size:14px}
+.c-btns .btn-sm svg{width:16px;height:16px}
+.btn-wa{background:linear-gradient(135deg,#25d366,#128c7e)!important;box-shadow:0 10px 22px rgba(37,211,102,.4)!important}

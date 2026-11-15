@@ -23,7 +23,6 @@ const COMPANY = {
     { n: '10+', t: 'Years of Experience' },
     { n: '5K+', t: 'Happy Customers' },
     { n: '100+', t: 'Products' },
-    { n: '5', t: 'Branches' }
   ],
   history: [
     { year: '2015', title: 'Company Founded', text: 'HM Trading Company started with a small shop selling mobile accessories.' },
@@ -56,7 +55,7 @@ const COMPANY_PS = {
   address: 'اصلي بازار، ستاسو ښار، ستاسو هیواد',
   owner: 'ستاسو نوم',
   ownerTitle: 'بنسټ ایښودونکی او مدیر',
-  stats: ['د تجربې کلونه', 'خوښ پیرودونکي', 'محصولات', 'څانګې'],
+  stats: ['د تجربې کلونه', 'خوښ پیرودونکي', 'محصولات',],
   history: [
     { title: 'شرکت تاسیس شو', text: 'HM Trading Company د موبایل لوازمو د پلورلو له یوې کوچنۍ دوکان سره پیل شو.' },
     { title: 'خپل برانډ پیل شو', text: 'موږ خپل لومړي موبایلونه او چارجرونه د خپل برانډ لاندې معرفي کړل.' },
@@ -81,7 +80,6 @@ const COMPANY_PS = {
   COMPANY.vision = P.vision; COMPANY.hours = P.hours; COMPANY.address = P.address;
   COMPANY.owner = P.owner; COMPANY.ownerTitle = P.ownerTitle;
   COMPANY.stats.forEach((s, i) => { if (P.stats[i]) s.t = P.stats[i]; });
-  COMPANY.history.forEach((h, i) => { if (P.history[i]) Object.assign(h, P.history[i]); });
   COMPANY.features.forEach((f, i) => { if (P.features[i]) Object.assign(f, P.features[i]); });
   COMPANY.phones.forEach((p, i) => { if (P.phoneLabels[i]) p.label = P.phoneLabels[i]; });
   COMPANY.branches.forEach((b, i) => { if (P.branchCities[i]) b.city = P.branchCities[i]; });
