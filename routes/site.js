@@ -41,7 +41,7 @@ router.put('/settings', adm, async (req, res) => {
     for (const k of KEYS) {
       if (req.body[k] === undefined) continue;
       await db.query(
-        'INSERT INTO settings (setting_key, setting_value) VALUES (?, ?) ON DUPLICATE KEY UPDATE setting_value = VALUES(setting_value)',
+        'INSERT INTO settings (setting_key, setting_value) VALUES (?, ?) ON CONFLICT (setting_key) DO UPDATE SET setting_value = EXCLUDED.setting_value',
         [k, clean(req.body[k], 300)]
       );
     }

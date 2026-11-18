@@ -10,9 +10,9 @@ const db = require('./config/db');
   }
   const hash = await bcrypt.hash(password, 10);
   await db.query(
-    'INSERT INTO users (full_name, email, password, role) VALUES (?, ?, ?, "admin")',
-    [name, email, hash]
+    "INSERT INTO users (full_name, email, password, role) VALUES (?, ?, ?, 'admin')",
+    [name, email.toLowerCase(), hash]
   );
   console.log('Admin created successfully!');
   process.exit(0);
-})();
+})().catch(e => { console.error(e.message); process.exit(1); });
