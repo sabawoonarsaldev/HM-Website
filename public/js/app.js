@@ -60,10 +60,8 @@ const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': 
 const money = n => '$' + Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const PLACEHOLDER = 'data:image/svg+xml;utf8,' + encodeURIComponent(
   '<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400"><rect width="400" height="400" fill="#dcfce7"/><text x="50%" y="52%" font-size="60" text-anchor="middle" fill="#22c55e" font-family="Arial" font-weight="bold">HM</text></svg>');
-const imgUrl = f => !f ? PLACEHOLDER
-  : /^https:\/\/res\.cloudinary\.com\//.test(f) ? f
-  : '/uploads/' + encodeURIComponent(f);
-  
+const imgUrl = f => (f && /^https:\/\/res\.cloudinary\.com\//.test(f)) ? f : PLACEHOLDER;
+
 const card = (p, i = 0) => `
   <a class="card" href="/product.html?id=${p.id}" style="animation-delay:${i * 0.05}s">
     <div class="card-img">

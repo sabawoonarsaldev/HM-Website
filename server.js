@@ -4,7 +4,6 @@ const path = require('path');
 const helmet = require('helmet');
 const compression = require('compression');
 const rateLimit = require('express-rate-limit');
-const multer = require('multer');
 
 const PROD = process.env.NODE_ENV === 'production';
 
@@ -45,10 +44,8 @@ app.use(express.static(path.join(__dirname, 'public'), {
     if (file.endsWith('.html')) res.setHeader('Cache-Control', 'no-cache'); // HTML همیشه تازه
   }
 }));
-// عکس‌های قدیمی که روی دیسک بودند (عکس‌های جدید در Cloudinary هستند)
-app.use('/uploads', express.static(path.join(__dirname, 'uploads'), {
-  maxAge: '30d', immutable: true, index: false, dotfiles: 'deny'
-}));
+
+
 
 
 /* ---------- محدودیت تعداد درخواست ---------- */
@@ -82,12 +79,10 @@ app.use('/api/site', require('./routes/site'));
 /* ---------- 404 برای API ---------- */
 app.use('/api', (req, res) => res.status(404).json({ message: 'Not found.' }));
 
-/* ---------- خطاها (بدون لو دادن جزئیات داخلی) ---------- */
 app.use((err, req, res, next) => {
-  const clientError = err instanceof multer.MulterError
-    || err.type === 'entity.parse.failed'
-    || (err.message || '').startsWith('Only JPG');
-  if (clientError) return res.status(400).json({ message: err.message });
+  if (err.type === 'entity.parse.failed' || err.type === 'entity.too.large') {
+    return res.status(400).json({ message: 'Invalid request.' });
+  }
   console.error(err);
   res.status(500).json({ message: 'Server error.' });
 });
