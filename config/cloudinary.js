@@ -8,27 +8,42 @@ cloudinary.config({
 });
 
 const FOLDER = 'hm-trading';
+const CLOUD = process.env.CLOUDINARY_CLOUD_NAME;
+const ALLOWED_FORMATS = 'jpg,jpeg,png,webp';
+const TRANSFORM = 'c_limit,h_1400,w_1400,q_auto'; // کوچک‌سازی هنگام آپلود
 
-// آپلود یک بافر به Cloudinary (با کوچک‌سازی و فشرده‌سازی خودکار)
-function uploadBuffer(buffer) {
-  return new Promise((resolve, reject) => {
-    cloudinary.uploader.upload_stream(
-      {
-        folder: FOLDER,
-        resource_type: 'image',
-        allowed_formats: ['jpg', 'jpeg', 'png', 'webp'],
-        transformation: [{ width: 1400, height: 1400, crop: 'limit', quality: 'auto', fetch_format: 'auto' }]
-      },
-      (err, result) => (err ? reject(err) : resolve({ url: result.secure_url, publicId: result.public_id }))
-    ).end(buffer);
-  });
+// امضای کوتاه‌مدت برای آپلود مستقیم از مرورگر
+function signUpload() {
+  const timestamp = Math.round(Date.now() / 1000);
+  const params = {
+    timestamp,
+    folder: FOLDER,
+    allowed_formats: ALLOWED_FORMATS,
+    transformation: TRANSFORM
+  };
+  const signature = cloudinary.utils.api_sign_request(params, process.env.CLOUDINARY_API_SECRET);
+  return {
+    signature, timestamp,
+    apiKey: process.env.CLOUDINARY_API_KEY,
+    cloudName: CLOUD,
+    folder: FOLDER,
+    allowedFormats: ALLOWED_FORMATS,
+    transformation: TRANSFORM
+  };
 }
 
-// حذف عکس (خطا را قورت می‌دهد تا حذف محصول متوقف نشود)
+// فقط آدرس‌های واقعی Cloudinary خودمان قبول می‌شود
+function isValidImage(url, publicId) {
+  if (typeof url !== 'string' || typeof publicId !== 'string') return false;
+  if (!publicId.startsWith(FOLDER + '/') || publicId.length > 200) return false;
+  if (!/^[A-Za-z0-9_\-\/]+$/.test(publicId)) return false;
+  return url.startsWith(`https://res.cloudinary.com/${CLOUD}/`) && url.length <= 500;
+}
+
 async function deleteImage(publicId) {
   if (!publicId) return;
   try { await cloudinary.uploader.destroy(publicId, { invalidate: true }); }
   catch (e) { console.error('Cloudinary delete failed:', e.message); }
 }
 
-module.exports = { uploadBuffer, deleteImage };
+module.exports = { signUpload, isValidImage, deleteImage, FOLDER };

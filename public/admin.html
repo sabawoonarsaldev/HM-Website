@@ -107,6 +107,51 @@
     run(async () => { await api('/api/products/' + id, { method: 'DELETE' }); toast('Product deleted'); products(); });
   }
 
+    /* ---------- آپلود مستقیم به Cloudinary (با نوار loading) ---------- */
+  const MAX_MB = 5, OK_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
+
+  function checkFile(f) {
+    if (!OK_TYPES.includes(f.type)) throw new Error(`"${f.name}": only JPG, PNG or WEBP images are allowed.`);
+    if (f.size > MAX_MB * 1024 * 1024) throw new Error(`"${f.name}": file is larger than ${MAX_MB}MB.`);
+  }
+
+  // یک عکس را مستقیم به Cloudinary می‌فرستد و پیشرفت را گزارش می‌دهد
+  function uploadToCloud(file, sig, onProgress) {
+    return new Promise((resolve, reject) => {
+      const fd = new FormData();
+      fd.append('file', file);
+      fd.append('api_key', sig.apiKey);
+      fd.append('timestamp', sig.timestamp);
+      fd.append('signature', sig.signature);
+      fd.append('folder', sig.folder);
+      fd.append('allowed_formats', sig.allowedFormats);
+      fd.append('transformation', sig.transformation);
+
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', `https://api.cloudinary.com/v1_1/${sig.cloudName}/image/upload`);
+      xhr.upload.onprogress = e => { if (e.lengthComputable) onProgress(e.loaded / e.total); };
+      xhr.onload = () => {
+        let r = {};
+        try { r = JSON.parse(xhr.responseText); } catch (e) {}
+        if (xhr.status === 200 && r.secure_url) resolve({ url: r.secure_url, publicId: r.public_id });
+        else reject(new Error((r.error && r.error.message) || 'Image upload failed.'));
+      };
+      xhr.onerror = () => reject(new Error('Network error during image upload.'));
+      xhr.send(fd);
+    });
+  }
+
+  // چند عکس را به ترتیب آپلود می‌کند و نوار پیشرفت کلی را نشان می‌دهد
+  async function uploadAll(files, setStatus) {
+    const out = [];
+    for (let i = 0; i < files.length; i++) {
+      const sig = await api('/api/uploads/sign');        // امضای تازه برای هر عکس
+      const r = await uploadToCloud(files[i], sig, p => setStatus(i, files.length, p));
+      out.push(r);
+    }
+    return out;
+  }
+
   function productForm(id) {
     run(async () => {
       cats = await api('/api/categories');
@@ -132,6 +177,10 @@
             ${p.images.map(g => `<div class="gimg"><img src="${imgUrl(g.image)}" alt="">
               <button type="button" onclick="delGallery(${id},${g.id},this)">×</button></div>`).join('')}</div></div>` : ''}
         </div>
+                <div id="f_bar" class="up-bar" style="display:none">
+          <div id="f_label" class="up-label">Uploading…</div>
+          <div class="up-track"><div id="f_barin" class="up-fill"></div></div>
+        </div>
         <div class="modal-foot">
           <button class="btn-sm" onclick="closeModal()">Cancel</button>
           <button class="btn" id="f_save" onclick="saveProduct(${id || 0})">Save</button>
@@ -150,21 +199,46 @@
   function saveProduct(id) {
     run(async () => {
       if (!$('f_name').value.trim() || !$('f_price').value) throw new Error('Name and price are required.');
-      if (!id && !$('f_image').files[0]) throw new Error('Main image is required.');
-      const fd = new FormData();
-      fd.append('name', $('f_name').value);
-      fd.append('price', $('f_price').value);
-      fd.append('category_id', $('f_cat').value);
-      fd.append('short_desc', $('f_short').value);
-      fd.append('description', $('f_desc').value);
-      fd.append('specs', $('f_specs').value);
-      if ($('f_image').files[0]) fd.append('image', $('f_image').files[0]);
-      for (const f of $('f_gallery').files) fd.append('gallery', f);
 
-      $('f_save').disabled = true;
+      const mainFile = $('f_image').files[0];
+      const galleryFiles = [...$('f_gallery').files];
+      const all = [...(mainFile ? [mainFile] : []), ...galleryFiles];
+      all.forEach(checkFile);
+      if (galleryFiles.length > 6) throw new Error('Maximum 6 gallery images.');
+
+      const btn = $('f_save'), bar = $('f_bar'), barIn = $('f_barin'), label = $('f_label');
+      btn.disabled = true;
+      bar.style.display = 'block';
+
+      const setStatus = (i, n, p) => {
+        const pct = Math.round(((i + p) / n) * 100);
+        barIn.style.width = pct + '%';
+        label.textContent = `Uploading image ${i + 1} of ${n}… ${pct}%`;
+      };
+
       try {
-        await api(id ? '/api/products/' + id : '/api/products', { method: id ? 'PUT' : 'POST', body: fd });
-      } catch (e) { $('f_save').disabled = false; throw e; }
+        let up = [];
+        if (all.length) up = await uploadAll(all, setStatus);
+
+        label.textContent = 'Saving product…';
+        barIn.style.width = '100%';
+
+        const main = mainFile ? up[0] : null;
+        const gallery = mainFile ? up.slice(1) : up;
+
+        await api(id ? '/api/products/' + id : '/api/products', {
+          method: id ? 'PUT' : 'POST',
+          ...json({
+            name: $('f_name').value, price: $('f_price').value, category_id: $('f_cat').value,
+            short_desc: $('f_short').value, description: $('f_desc').value, specs: $('f_specs').value,
+            image: main, gallery
+          })
+        });
+      } catch (e) {
+        btn.disabled = false;
+        bar.style.display = 'none';
+        throw e;
+      }
       closeModal();
       toast(id ? 'Product updated' : 'Product added');
       products();

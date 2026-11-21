@@ -458,3 +458,10 @@ svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke
 .c-btns .btn-sm{display:inline-flex;align-items:center;gap:6px;padding:11px 20px;font-size:14px}
 .c-btns .btn-sm svg{width:16px;height:16px}
 .btn-wa{background:linear-gradient(135deg,#25d366,#128c7e)!important;box-shadow:0 10px 22px rgba(37,211,102,.4)!important}
+
+
+/* ===== نوار پیشرفت آپلود ===== */
+.up-bar{margin:14px 0 4px;padding:12px 14px;background:var(--mint);border-radius:14px}
+.up-label{font-size:13px;font-weight:600;color:var(--green-dark);margin-bottom:8px}
+.up-track{height:10px;background:rgba(0,0,0,.08);border-radius:99px;overflow:hidden}
+.up-fill{height:100%;width:0;border-radius:99px;background:linear-gradient(90deg,#4ade80,#22c55e);transition:width .2s}

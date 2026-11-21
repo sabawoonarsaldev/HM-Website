@@ -27,8 +27,8 @@ app.use(helmet({
       'style-src': ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
       'font-src': ["'self'", 'https://fonts.gstatic.com', 'data:'],
       'img-src': ["'self'", 'data:', 'blob:', 'https://res.cloudinary.com'],
-      'connect-src': ["'self'"],
-      'upgrade-insecure-requests': PROD ? [] : null
+      'connect-src': ["'self'", 'https://api.cloudinary.com'],
+            'upgrade-insecure-requests': PROD ? [] : null
     }
   },
   crossOriginEmbedderPolicy: false
@@ -50,6 +50,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads'), {
   maxAge: '30d', immutable: true, index: false, dotfiles: 'deny'
 }));
 
+
 /* ---------- محدودیت تعداد درخواست ---------- */
 const makeLimiter = (minutes, limit, message, extra = {}) => rateLimit({
   windowMs: minutes * 60 * 1000, limit,
@@ -65,6 +66,9 @@ app.use('/api/auth/login', makeLimiter(15, 20, 'Too many login attempts. Try aga
 app.use('/api/comments', onlyPost(makeLimiter(10, 3, 'Too many comments. Please wait a few minutes.')));
 app.use('/api', (req, res, next) =>
   (['POST', 'PUT', 'DELETE'].includes(req.method) ? writeLimiter(req, res, next) : next()));
+app.use('/api/uploads/sign', makeLimiter(1, 30, 'Too many upload requests. Please wait.'));
+app.use('/api/uploads', require('./routes/uploads'));
+
 
 /* ---------- Routes ---------- */
 app.get('/api/health', (req, res) => res.json({ status: 'OK' }));
